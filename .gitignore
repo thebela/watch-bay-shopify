@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.env.*
+
+# Shopify local/runtime files
+.shopify/
+node_modules/
+
+# Editor and system noise
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
