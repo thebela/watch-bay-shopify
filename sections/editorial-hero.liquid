@@ -1,0 +1,615 @@
+{% liquid
+  assign section_label = section.settings.accessible_label | default: 'Editorial hero'
+  assign image_loading = 'lazy'
+  assign image_fetchpriority = 'auto'
+
+  if section.index == 1
+    assign image_loading = 'eager'
+    assign image_fetchpriority = 'high'
+  endif
+%}
+
+<section
+  id="EditorialHero-{{ section.id }}"
+  class="editorial-hero"
+  aria-label="{{ section_label | escape }}"
+>
+  <div class="editorial-hero__inner">
+    {% for block in section.blocks %}
+      {% liquid
+        assign placement = block.settings.placement | default: 'text'
+        assign alignment = block.settings.alignment | default: 'left'
+      %}
+
+      <div
+        class="editorial-hero__block editorial-hero__block--{{ block.type }} editorial-hero__block--{{ placement }} editorial-hero__block--align-{{ alignment }}"
+        {{ block.shopify_attributes }}
+      >
+        {% case block.type %}
+          {% when 'eyebrow' %}
+            {% if block.settings.text != blank %}
+              <p class="editorial-hero__eyebrow">{{ block.settings.text | escape }}</p>
+            {% endif %}
+
+          {% when 'heading' %}
+            {% if block.settings.text != blank %}
+              {% if block.settings.heading_level == 'h1' %}
+                <h1 class="editorial-hero__heading">{{ block.settings.text | escape }}</h1>
+              {% else %}
+                <h2 class="editorial-hero__heading">{{ block.settings.text | escape }}</h2>
+              {% endif %}
+            {% endif %}
+
+          {% when 'text' %}
+            {% if block.settings.text != blank %}
+              <div class="editorial-hero__text rte">{{ block.settings.text }}</div>
+            {% endif %}
+
+          {% when 'button' %}
+            {% if block.settings.label != blank and block.settings.link != blank %}
+              <a
+                class="editorial-hero__button"
+                href="{{ block.settings.link }}"
+                {% if block.settings.open_in_new_tab %}
+                  target="_blank" rel="noopener"
+                {% endif %}
+              >
+                {{ block.settings.label | escape }}
+                <span aria-hidden="true">→</span>
+              </a>
+            {% endif %}
+
+          {% when 'image' %}
+            {% liquid
+              assign hero_image = block.settings.image
+              assign image_alt = hero_image.alt | default: block.settings.caption | default: section_label | escape
+            %}
+
+            <figure class="editorial-hero__figure editorial-hero__figure--{{ block.settings.image_shape }}">
+              {% if hero_image != blank %}
+                {{
+                  hero_image
+                  | image_url: width: 1800
+                  | image_tag:
+                    widths: '360, 540, 720, 960, 1200, 1500, 1800',
+                    sizes: '(min-width: 990px) 42vw, (min-width: 750px) 48vw, 92vw',
+                    loading: image_loading,
+                    fetchpriority: image_fetchpriority,
+                    alt: image_alt,
+                    class: 'editorial-hero__image'
+                }}
+              {% else %}
+                {{ 'product-apparel-1' | placeholder_svg_tag: 'editorial-hero__placeholder' }}
+              {% endif %}
+
+              {% if block.settings.caption != blank %}
+                <figcaption class="editorial-hero__caption">{{ block.settings.caption | escape }}</figcaption>
+              {% endif %}
+            </figure>
+
+          {% when 'quote' %}
+            {% if block.settings.quote != blank %}
+              <blockquote class="editorial-hero__quote">
+                <p>{{ block.settings.quote | escape }}</p>
+              </blockquote>
+            {% endif %}
+
+          {% when 'divider' %}
+            <div class="editorial-hero__divider" aria-hidden="true"></div>
+        {% endcase %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<style>
+  /* All selectors are scoped to this section instance so block freedom stays isolated. */
+  #EditorialHero-{{ section.id }} {
+    --editorial-bg: #f4f0e8;
+    --editorial-ink: #111;
+    --editorial-muted: rgba(17, 17, 17, 0.62);
+    --editorial-line: rgba(17, 17, 17, 0.16);
+    --editorial-accent: #8a6b3d;
+
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.52), transparent 36%),
+      var(--editorial-bg);
+    color: var(--editorial-ink);
+    min-height: {{ section.settings.min_height }}svh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #EditorialHero-{{ section.id }}::before {
+    background: var(--editorial-line);
+    content: "";
+    height: 1px;
+    left: 50%;
+    position: absolute;
+    top: clamp(1rem, 3vw, 2rem);
+    transform: translateX(-50%);
+    width: min(82rem, calc(100% - 2rem));
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__inner {
+    align-content: center;
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2.4rem);
+    margin-inline: auto;
+    max-width: 82rem;
+    min-height: inherit;
+    padding: clamp(4.5rem, 8vw, 7.5rem) 1.25rem;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__block {
+    min-width: 0;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__block--align-left {
+    text-align: left;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__block--align-center {
+    text-align: center;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__block--align-right {
+    text-align: right;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__eyebrow {
+    color: var(--editorial-muted);
+    font-family: var(--font-body--family, system-ui, sans-serif);
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.28em;
+    line-height: 1.25;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__heading {
+    color: var(--editorial-ink);
+    font-family: var(--font-heading--family, Georgia, serif);
+    font-size: clamp(3.25rem, 12vw, 9.5rem);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 0.88;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__text {
+    color: var(--editorial-muted);
+    font-family: var(--font-body--family, system-ui, sans-serif);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    line-height: 1.7;
+    max-width: 35rem;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__text > * {
+    margin-block: 0;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__text > * + * {
+    margin-block-start: 0.85rem;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__button {
+    align-items: center;
+    color: var(--editorial-ink);
+    display: inline-flex;
+    font-family: var(--font-body--family, system-ui, sans-serif);
+    font-size: 0.82rem;
+    font-weight: 650;
+    gap: 0.45rem;
+    letter-spacing: 0.13em;
+    min-height: 44px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 180ms ease, transform 180ms ease;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__button:hover {
+    color: var(--editorial-accent);
+    transform: translateY(-1px);
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__button:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 0.45rem;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__figure {
+    margin: 0;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__image,
+  #EditorialHero-{{ section.id }} .editorial-hero__placeholder {
+    display: block;
+    height: auto;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__figure--portrait .editorial-hero__image,
+  #EditorialHero-{{ section.id }} .editorial-hero__figure--portrait .editorial-hero__placeholder {
+    aspect-ratio: 4 / 5;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__figure--landscape .editorial-hero__image,
+  #EditorialHero-{{ section.id }} .editorial-hero__figure--landscape .editorial-hero__placeholder {
+    aspect-ratio: 16 / 10;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__figure--square .editorial-hero__image,
+  #EditorialHero-{{ section.id }} .editorial-hero__figure--square .editorial-hero__placeholder {
+    aspect-ratio: 1;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__placeholder {
+    background: rgba(17, 17, 17, 0.05);
+    color: rgba(17, 17, 17, 0.18);
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__caption {
+    color: var(--editorial-muted);
+    font-family: var(--font-body--family, system-ui, sans-serif);
+    font-size: 0.74rem;
+    letter-spacing: 0.18em;
+    margin-block-start: 0.85rem;
+    text-transform: uppercase;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__quote {
+    border-inline-start: 1px solid var(--editorial-line);
+    color: var(--editorial-ink);
+    font-family: var(--font-heading--family, Georgia, serif);
+    font-size: clamp(1.35rem, 3.4vw, 2.35rem);
+    line-height: 1.12;
+    margin: 0;
+    padding-inline-start: 1.15rem;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__quote p {
+    margin: 0;
+  }
+
+  #EditorialHero-{{ section.id }} .editorial-hero__divider {
+    background: var(--editorial-line);
+    height: 1px;
+    width: 100%;
+  }
+
+  @media screen and (min-width: 750px) {
+    #EditorialHero-{{ section.id }} .editorial-hero__inner {
+      padding-inline: 2rem;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    #EditorialHero-{{ section.id }} .editorial-hero__inner {
+      grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+    }
+
+    /* Placement controls let merchants drag block order and choose the desktop column. */
+    #EditorialHero-{{ section.id }} .editorial-hero__block--text {
+      grid-column: 1;
+    }
+
+    #EditorialHero-{{ section.id }} .editorial-hero__block--media {
+      grid-column: 2;
+    }
+
+    #EditorialHero-{{ section.id }} .editorial-hero__block--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #EditorialHero-{{ section.id }} .editorial-hero__button {
+      transition: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Editorial hero",
+  "tag": "section",
+  "class": "section-wrapper",
+  "settings": [
+    {
+      "type": "text",
+      "id": "accessible_label",
+      "label": "Accessible label",
+      "default": "Watch Bay editorial hero"
+    },
+    {
+      "type": "range",
+      "id": "min_height",
+      "label": "Minimum height",
+      "min": 60,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 90
+    }
+  ],
+  "blocks": [
+    {
+      "type": "eyebrow",
+      "name": "Eyebrow",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "WATCH BAY"
+        },
+        {
+          "type": "select",
+          "id": "placement",
+          "label": "Desktop placement",
+          "options": [
+            { "value": "text", "label": "Text column" },
+            { "value": "media", "label": "Media column" },
+            { "value": "full", "label": "Full width" }
+          ],
+          "default": "text"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Precision has a presence."
+        },
+        {
+          "type": "select",
+          "id": "heading_level",
+          "label": "Heading level",
+          "options": [
+            { "value": "h1", "label": "H1" },
+            { "value": "h2", "label": "H2" }
+          ],
+          "default": "h1"
+        },
+        {
+          "type": "select",
+          "id": "placement",
+          "label": "Desktop placement",
+          "options": [
+            { "value": "text", "label": "Text column" },
+            { "value": "media", "label": "Media column" },
+            { "value": "full", "label": "Full width" }
+          ],
+          "default": "text"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Exceptional timepieces selected for those who value restraint, engineering, and permanence over noise.</p>"
+        },
+        {
+          "type": "select",
+          "id": "placement",
+          "label": "Desktop placement",
+          "options": [
+            { "value": "text", "label": "Text column" },
+            { "value": "media", "label": "Media column" },
+            { "value": "full", "label": "Full width" }
+          ],
+          "default": "text"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Explore Collection"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "default": "/collections/all"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open in new tab",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "placement",
+          "label": "Desktop placement",
+          "options": [
+            { "value": "text", "label": "Text column" },
+            { "value": "media", "label": "Media column" },
+            { "value": "full", "label": "Full width" }
+          ],
+          "default": "text"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "default": "Zenith"
+        },
+        {
+          "type": "select",
+          "id": "image_shape",
+          "label": "Image shape",
+          "options": [
+            { "value": "portrait", "label": "Portrait" },
+            { "value": "landscape", "label": "Landscape" },
+            { "value": "square", "label": "Square" }
+          ],
+          "default": "portrait"
+        },
+        {
+          "type": "select",
+          "id": "placement",
+          "label": "Desktop placement",
+          "options": [
+            { "value": "text", "label": "Text column" },
+            { "value": "media", "label": "Media column" },
+            { "value": "full", "label": "Full width" }
+          ],
+          "default": "media"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    },
+    {
+      "type": "quote",
+      "name": "Quote",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "A watch is not worn to keep time. It is worn to keep standards."
+        },
+        {
+          "type": "select",
+          "id": "placement",
+          "label": "Desktop placement",
+          "options": [
+            { "value": "text", "label": "Text column" },
+            { "value": "media", "label": "Media column" },
+            { "value": "full", "label": "Full width" }
+          ],
+          "default": "full"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "name": "Divider",
+      "settings": [
+        {
+          "type": "select",
+          "id": "placement",
+          "label": "Desktop placement",
+          "options": [
+            { "value": "text", "label": "Text column" },
+            { "value": "media", "label": "Media column" },
+            { "value": "full", "label": "Full width" }
+          ],
+          "default": "full"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial hero",
+      "category": "Banners",
+      "blocks": [
+        { "type": "eyebrow" },
+        { "type": "heading" },
+        { "type": "text" },
+        { "type": "button" },
+        { "type": "image" },
+        { "type": "quote" }
+      ]
+    }
+  ]
+}
+{% endschema %}
