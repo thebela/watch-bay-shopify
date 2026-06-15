@@ -1,0 +1,1117 @@
+{% liquid
+  assign hero_image = section.settings.hero_image
+  assign philosophy_image = section.settings.philosophy_image
+  assign collection = section.settings.collection
+  assign hero_loading = 'lazy'
+  assign hero_fetchpriority = 'auto'
+
+  if section.index == 1
+    assign hero_loading = 'eager'
+    assign hero_fetchpriority = 'high'
+  endif
+%}
+
+<div id="WatchBayHomepage-{{ section.id }}" class="watchbay-homepage">
+  <div class="watchbay-homepage__announcement">
+    {{ section.settings.announcement | escape }}
+  </div>
+
+  <section class="watchbay-homepage__hero" aria-labelledby="WatchBayHomepageHeading-{{ section.id }}">
+    <header class="watchbay-homepage__nav" aria-label="Homepage navigation">
+      <a class="watchbay-homepage__brand" href="{{ routes.root_url }}" aria-label="Watch Bay home">WATCH BAY</a>
+
+      <nav class="watchbay-homepage__links" aria-label="Primary">
+        <a href="{{ routes.root_url }}">Home</a>
+        <a href="{{ section.settings.collection_link }}">Collection</a>
+        <a href="{{ section.settings.about_link }}">About</a>
+        <a href="{{ section.settings.journal_link }}">Journal</a>
+        <a href="{{ section.settings.contact_link }}">Contact</a>
+      </nav>
+
+      <div class="watchbay-homepage__actions" aria-label="Store actions">
+        <a href="{{ routes.search_url }}" aria-label="Search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m16.5 16.5 4 4"></path>
+          </svg>
+        </a>
+        <a href="{{ routes.account_url }}" aria-label="Account">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.5"></circle>
+            <path d="M5 20c1.3-3.7 3.6-5.5 7-5.5s5.7 1.8 7 5.5"></path>
+          </svg>
+        </a>
+        <a class="watchbay-homepage__cart-link" href="{{ routes.cart_url }}" aria-label="Cart">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 8h10l-.8 12H7.8L7 8Z"></path>
+            <path d="M9 8a3 3 0 0 1 6 0"></path>
+          </svg>
+          <span>({{ cart.item_count }})</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="watchbay-homepage__hero-grid">
+      <div class="watchbay-homepage__hero-copy">
+        <p class="watchbay-homepage__eyebrow">{{ section.settings.hero_eyebrow | escape }}</p>
+        <h1 id="WatchBayHomepageHeading-{{ section.id }}">{{ section.settings.hero_heading | newline_to_br }}</h1>
+        <p>{{ section.settings.hero_text | escape }}</p>
+        <a class="watchbay-homepage__text-link" href="{{ section.settings.hero_cta_link }}">
+          {{ section.settings.hero_cta_label | escape }}
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <div class="watchbay-homepage__hero-media" aria-hidden="{% if hero_image == blank %}true{% else %}false{% endif %}">
+        {% if hero_image != blank %}
+          {{
+            hero_image
+            | image_url: width: 2200
+            | image_tag:
+              widths: '720, 960, 1200, 1500, 1800, 2200',
+              sizes: '(min-width: 990px) 62vw, 100vw',
+              loading: hero_loading,
+              fetchpriority: hero_fetchpriority,
+              alt: hero_image.alt,
+              class: 'watchbay-homepage__hero-image'
+          }}
+        {% else %}
+          {{ 'product-apparel-1' | placeholder_svg_tag: 'watchbay-homepage__hero-placeholder' }}
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="watchbay-homepage__philosophy" aria-labelledby="WatchBayPhilosophyHeading-{{ section.id }}">
+    <div class="watchbay-homepage__philosophy-copy">
+      <p class="watchbay-homepage__eyebrow">{{ section.settings.philosophy_eyebrow | escape }}</p>
+      <h2 id="WatchBayPhilosophyHeading-{{ section.id }}">{{ section.settings.philosophy_heading | newline_to_br }}</h2>
+      <p>{{ section.settings.philosophy_text | newline_to_br }}</p>
+      <a class="watchbay-homepage__text-link watchbay-homepage__text-link--dark" href="{{ section.settings.philosophy_link }}">
+        {{ section.settings.philosophy_cta_label | escape }}
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <figure class="watchbay-homepage__philosophy-media">
+      {% if philosophy_image != blank %}
+        {{
+          philosophy_image
+          | image_url: width: 1500
+          | image_tag:
+            widths: '540, 720, 960, 1200, 1500',
+            sizes: '(min-width: 990px) 42vw, 92vw',
+            loading: 'lazy',
+            alt: philosophy_image.alt,
+            class: 'watchbay-homepage__philosophy-image'
+        }}
+      {% else %}
+        {{ 'product-apparel-2' | placeholder_svg_tag: 'watchbay-homepage__philosophy-placeholder' }}
+      {% endif %}
+    </figure>
+  </section>
+
+  <section class="watchbay-homepage__curated" aria-labelledby="WatchBayCuratedHeading-{{ section.id }}">
+    <div class="watchbay-homepage__curated-copy">
+      <p class="watchbay-homepage__eyebrow">{{ section.settings.curated_eyebrow | escape }}</p>
+      <h2 id="WatchBayCuratedHeading-{{ section.id }}">{{ section.settings.curated_heading | newline_to_br }}</h2>
+      <a class="watchbay-homepage__text-link" href="{{ section.settings.collection_link }}">
+        {{ section.settings.curated_cta_label | escape }}
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <div class="watchbay-homepage__product-area">
+      <div class="watchbay-homepage__products" role="list">
+        {% if collection != blank and collection.products_count > 0 %}
+          {% for product in collection.products limit: 3 %}
+            <a class="watchbay-homepage__product" href="{{ product.url }}" role="listitem">
+              <span class="watchbay-homepage__product-image-frame">
+                {% if product.featured_image != blank %}
+                  {{
+                    product.featured_image
+                    | image_url: width: 800
+                    | image_tag:
+                      widths: '360, 540, 720, 800',
+                      sizes: '(min-width: 990px) 18vw, (min-width: 750px) 28vw, 76vw',
+                      loading: 'lazy',
+                      alt: product.featured_image.alt,
+                      class: 'watchbay-homepage__product-image'
+                  }}
+                {% else %}
+                  {{ 'product-apparel-1' | placeholder_svg_tag: 'watchbay-homepage__product-placeholder' }}
+                {% endif %}
+              </span>
+              <span class="watchbay-homepage__product-title">{{ product.title }}</span>
+              <span class="watchbay-homepage__product-price">{{ product.price | money }}</span>
+            </a>
+          {% endfor %}
+        {% else %}
+          {% for i in (1..3) %}
+            <div class="watchbay-homepage__product" role="listitem">
+              <span class="watchbay-homepage__product-image-frame">
+                {{ 'product-apparel-1' | placeholder_svg_tag: 'watchbay-homepage__product-placeholder' }}
+              </span>
+              <span class="watchbay-homepage__product-title">Heritage Moonphase</span>
+              <span class="watchbay-homepage__product-price">₹ 189,000</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <a class="watchbay-homepage__text-link watchbay-homepage__view-all" href="{{ section.settings.collection_link }}">
+        View All Watches
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="watchbay-homepage__trust" aria-label="Store benefits">
+    <div class="watchbay-homepage__trust-item">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path>
+      </svg>
+      <div>
+        <h3>{{ section.settings.trust_1_title | escape }}</h3>
+        <p>{{ section.settings.trust_1_text | escape }}</p>
+      </div>
+    </div>
+    <div class="watchbay-homepage__trust-item">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3 5 6v5c0 4.5 2.8 7.8 7 10 4.2-2.2 7-5.5 7-10V6l-7-3Z"></path>
+        <path d="m8.5 12 2.2 2.2L15.8 9"></path>
+      </svg>
+      <div>
+        <h3>{{ section.settings.trust_2_title | escape }}</h3>
+        <p>{{ section.settings.trust_2_text | escape }}</p>
+      </div>
+    </div>
+    <div class="watchbay-homepage__trust-item">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 8a7 7 0 0 1 11.8-1.8L20 8"></path>
+        <path d="M20 4v4h-4"></path>
+        <path d="M18 16A7 7 0 0 1 6.2 17.8L4 16"></path>
+        <path d="M4 20v-4h4"></path>
+      </svg>
+      <div>
+        <h3>{{ section.settings.trust_3_title | escape }}</h3>
+        <p>{{ section.settings.trust_3_text | escape }}</p>
+      </div>
+    </div>
+    <div class="watchbay-homepage__trust-item">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 10h16v10H4V10Z"></path>
+        <path d="M12 10v10M4 14h16"></path>
+        <path d="M8.5 10C6 8.4 6.8 5 9.2 5c1.8 0 2.8 2 2.8 5"></path>
+        <path d="M15.5 10C18 8.4 17.2 5 14.8 5 13 5 12 7 12 10"></path>
+      </svg>
+      <div>
+        <h3>{{ section.settings.trust_4_title | escape }}</h3>
+        <p>{{ section.settings.trust_4_text | escape }}</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="watchbay-homepage__footer">
+    <div class="watchbay-homepage__footer-brand">
+      <h2>WATCH BAY</h2>
+      <p>Precision. Heritage.<br>Timeless Design.</p>
+      <div class="watchbay-homepage__socials" aria-label="Social links">
+        <a href="{{ section.settings.instagram_link }}" aria-label="Instagram">Ig</a>
+        <a href="{{ section.settings.facebook_link }}" aria-label="Facebook">Fb</a>
+        <a href="{{ section.settings.pinterest_link }}" aria-label="Pinterest">Pi</a>
+      </div>
+    </div>
+
+    <nav class="watchbay-homepage__footer-nav" aria-label="Footer navigation">
+      <div>
+        <h3>Shop</h3>
+        <a href="{{ section.settings.collection_link }}">All Watches</a>
+        <a href="{{ section.settings.collection_link }}">New Arrivals</a>
+        <a href="{{ section.settings.collection_link }}">Best Sellers</a>
+        <a href="{{ section.settings.collection_link }}">Limited Editions</a>
+      </div>
+      <div>
+        <h3>Company</h3>
+        <a href="{{ section.settings.about_link }}">About Us</a>
+        <a href="{{ section.settings.about_link }}">Our Craft</a>
+        <a href="{{ section.settings.journal_link }}">Journal</a>
+        <a href="{{ section.settings.about_link }}">Careers</a>
+      </div>
+      <div>
+        <h3>Customer Care</h3>
+        <a href="{{ section.settings.contact_link }}">Contact Us</a>
+        <a href="/policies/shipping-policy">Shipping & Delivery</a>
+        <a href="/policies/refund-policy">Returns & Exchanges</a>
+        <a href="/policies/terms-of-service">Warranty</a>
+      </div>
+    </nav>
+
+    <div class="watchbay-homepage__newsletter">
+      <h3>Newsletter</h3>
+      <p>Join for early access to new releases and exclusive offers.</p>
+      {% form 'customer', class: 'watchbay-homepage__newsletter-form' %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <label class="visually-hidden" for="WatchBayNewsletter-{{ section.id }}">Email address</label>
+        <input
+          id="WatchBayNewsletter-{{ section.id }}"
+          type="email"
+          name="contact[email]"
+          value="{{ form.email }}"
+          autocorrect="off"
+          autocapitalize="off"
+          autocomplete="email"
+          placeholder="Enter your email"
+          required
+        >
+        <button type="submit" aria-label="Subscribe">→</button>
+      {% endform %}
+    </div>
+
+    <div class="watchbay-homepage__legal">
+      <p>© 2024 Watch Bay. All rights reserved.</p>
+      <div>
+        <a href="/policies/privacy-policy">Privacy Policy</a>
+        <a href="/policies/terms-of-service">Terms of Service</a>
+        <a href="/policies/privacy-policy">Cookies</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<style>
+  body:has(#WatchBayHomepage-{{ section.id }}) #header-group,
+  body:has(#WatchBayHomepage-{{ section.id }}) #footer-group {
+    display: none;
+  }
+
+  body:has(#WatchBayHomepage-{{ section.id }}) {
+    background: #020202;
+  }
+
+  #WatchBayHomepage-{{ section.id }} {
+    --wb-black: #020202;
+    --wb-cream: #f2eee6;
+    --wb-text: #f7f5ef;
+    --wb-ink: #111;
+    --wb-muted-light: rgba(247, 245, 239, 0.72);
+    --wb-muted-dark: rgba(17, 17, 17, 0.66);
+    --wb-line-light: rgba(247, 245, 239, 0.17);
+    --wb-line-dark: rgba(17, 17, 17, 0.16);
+    --wb-gold: #b59b73;
+    --wb-shell: #f5f0e8;
+
+    background: var(--wb-black);
+    color: var(--wb-text);
+    font-family: var(--font-body--family, Inter, system-ui, sans-serif);
+  }
+
+  #WatchBayHomepage-{{ section.id }} * {
+    box-sizing: border-box;
+  }
+
+  #WatchBayHomepage-{{ section.id }} a {
+    color: inherit;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__announcement {
+    align-items: center;
+    background: #0b0b0b;
+    border-bottom: 1px solid var(--wb-line-light);
+    color: rgba(247, 245, 239, 0.78);
+    display: flex;
+    font-size: clamp(0.62rem, 1.2vw, 0.78rem);
+    font-weight: 500;
+    justify-content: center;
+    letter-spacing: 0.25em;
+    min-height: 45px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero {
+    background:
+      radial-gradient(circle at 74% 45%, rgba(255, 255, 255, 0.08), transparent 21rem),
+      linear-gradient(90deg, #020202 0%, #020202 30%, rgba(2, 2, 2, 0.96) 42%, rgba(2, 2, 2, 0.55) 63%, #020202 100%);
+    min-height: calc(100svh - 45px);
+    overflow: hidden;
+    position: relative;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__nav {
+    align-items: center;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: 1fr auto 1fr;
+    min-height: 96px;
+    padding: 1.55rem clamp(1.25rem, 4vw, 4.4rem);
+    position: relative;
+    z-index: 2;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__brand,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-brand h2 {
+    font-family: var(--font-heading--family, Georgia, serif);
+    font-size: clamp(1.05rem, 1.8vw, 1.55rem);
+    font-weight: 400;
+    letter-spacing: 0.36em;
+    text-decoration: none;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__links,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__actions {
+    align-items: center;
+    display: flex;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__links {
+    gap: clamp(1.5rem, 4vw, 3.7rem);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__links a,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-nav a {
+    text-decoration: none;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__links a {
+    color: rgba(247, 245, 239, 0.86);
+    font-size: 0.76rem;
+    font-weight: 520;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__actions {
+    gap: 1.5rem;
+    justify-content: flex-end;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__actions a {
+    align-items: center;
+    color: rgba(247, 245, 239, 0.9);
+    display: inline-flex;
+    gap: 0.4rem;
+    min-height: 44px;
+    text-decoration: none;
+  }
+
+  #WatchBayHomepage-{{ section.id }} svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.45;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__actions svg {
+    height: 24px;
+    width: 24px;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__cart-link span {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-grid {
+    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.24fr);
+    min-height: calc(100svh - 141px);
+    padding: 0 clamp(1.25rem, 4.8vw, 5rem) clamp(3.5rem, 7vw, 6.5rem);
+    position: relative;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-copy {
+    max-width: 31rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__eyebrow {
+    color: var(--wb-muted-light);
+    font-size: 0.73rem;
+    font-weight: 560;
+    letter-spacing: 0.22em;
+    line-height: 1.4;
+    margin: 0 0 1.65rem;
+    text-transform: uppercase;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero h1,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy h2,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__curated h2 {
+    font-family: var(--font-heading--family, Georgia, serif);
+    font-weight: 400;
+    letter-spacing: 0;
+    margin: 0;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero h1 {
+    color: #fff;
+    font-size: clamp(4.8rem, 8vw, 7.7rem);
+    line-height: 0.9;
+    text-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.34);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-copy > p:not(.watchbay-homepage__eyebrow) {
+    color: rgba(247, 245, 239, 0.82);
+    font-size: clamp(1rem, 1.45vw, 1.18rem);
+    line-height: 1.72;
+    margin: 1.8rem 0 0;
+    max-width: 27rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__text-link {
+    align-items: center;
+    border-bottom: 1px solid var(--wb-gold);
+    color: var(--wb-text);
+    display: inline-flex;
+    font-size: 0.76rem;
+    font-weight: 560;
+    gap: 1.4rem;
+    letter-spacing: 0.22em;
+    margin-top: 2rem;
+    min-height: 44px;
+    padding-bottom: 0.62rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 180ms ease, border-color 180ms ease, transform 180ms ease;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__text-link:hover {
+    color: var(--wb-gold);
+    transform: translateY(-1px);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-media {
+    align-self: stretch;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    position: absolute;
+    right: 0;
+    top: 96px;
+    width: min(72vw, 58rem);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-image,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-placeholder {
+    height: 100%;
+    object-fit: cover;
+    object-position: center right;
+    width: 100%;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-media::before {
+    background: linear-gradient(90deg, #020202 0%, rgba(2, 2, 2, 0.84) 12%, rgba(2, 2, 2, 0.16) 38%, transparent 70%);
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy {
+    align-items: center;
+    background: var(--wb-shell);
+    color: var(--wb-ink);
+    display: grid;
+    gap: clamp(2rem, 6vw, 6.5rem);
+    grid-template-columns: minmax(0, 0.83fr) minmax(0, 1fr);
+    padding: clamp(3rem, 6.5vw, 5rem) clamp(1.25rem, 5vw, 5rem);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy .watchbay-homepage__eyebrow,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust h3,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer h3 {
+    color: var(--wb-muted-dark);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy h2 {
+    font-size: clamp(2.5rem, 4.4vw, 4rem);
+    line-height: 1.02;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy-copy > p:not(.watchbay-homepage__eyebrow) {
+    color: var(--wb-muted-dark);
+    font-size: clamp(1rem, 1.3vw, 1.1rem);
+    line-height: 1.7;
+    margin: 1.6rem 0 0;
+    max-width: 33rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__text-link--dark {
+    color: var(--wb-ink);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy-media {
+    margin: 0;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy-image,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy-placeholder {
+    aspect-ratio: 16 / 9;
+    display: block;
+    height: auto;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__curated {
+    align-items: center;
+    background: #020202;
+    color: var(--wb-text);
+    display: grid;
+    gap: clamp(2rem, 5vw, 5rem);
+    grid-template-columns: minmax(16rem, 0.72fr) minmax(0, 1.35fr);
+    padding: clamp(3.5rem, 7vw, 5.8rem) clamp(1.25rem, 5vw, 5rem);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__curated h2 {
+    font-size: clamp(2.8rem, 4.5vw, 4.25rem);
+    line-height: 1.03;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__products {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__product {
+    background: #111;
+    color: var(--wb-text);
+    display: grid;
+    min-width: 0;
+    padding: 0;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__product-image-frame {
+    background: #0b0b0b;
+    display: block;
+    overflow: hidden;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__product-image,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__product-placeholder {
+    aspect-ratio: 1.12;
+    display: block;
+    height: auto;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__product-title {
+    color: rgba(247, 245, 239, 0.9);
+    font-size: 0.94rem;
+    line-height: 1.35;
+    padding: 1rem 1rem 0.2rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__product-price {
+    color: rgba(247, 245, 239, 0.74);
+    font-size: 0.9rem;
+    padding: 0 1rem 1.25rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__view-all {
+    margin-top: 1.4rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust {
+    background: var(--wb-shell);
+    color: var(--wb-ink);
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 2.2rem clamp(1.25rem, 5vw, 5rem);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust-item {
+    align-items: center;
+    display: flex;
+    gap: 1.2rem;
+    min-width: 0;
+    padding: 0.25rem clamp(1rem, 2.4vw, 2rem);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust-item + .watchbay-homepage__trust-item {
+    border-left: 1px solid var(--wb-line-dark);
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust svg {
+    color: var(--wb-ink);
+    flex: 0 0 auto;
+    height: 38px;
+    width: 38px;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust h3,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer h3 {
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust p {
+    color: var(--wb-muted-dark);
+    font-size: 0.86rem;
+    line-height: 1.45;
+    margin: 0.35rem 0 0;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer {
+    background: #070707;
+    border-top: 1px solid var(--wb-line-light);
+    color: rgba(247, 245, 239, 0.82);
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: 1.05fr 2fr 1.25fr;
+    padding: clamp(2.8rem, 5.2vw, 4.7rem) clamp(1.25rem, 5vw, 5rem) 1.5rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-brand h2,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-brand p,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__newsletter p {
+    margin: 0;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-brand p,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__newsletter p,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-nav a {
+    color: rgba(247, 245, 239, 0.68);
+    font-size: 0.86rem;
+    line-height: 1.7;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-brand p {
+    margin-top: 1.4rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__socials {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.6rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__socials a {
+    font-size: 0.78rem;
+    text-decoration: none;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-nav {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-nav div {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-nav h3,
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__newsletter h3 {
+    color: rgba(247, 245, 239, 0.82);
+    margin-bottom: 0.75rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__newsletter-form {
+    align-items: center;
+    border: 1px solid rgba(247, 245, 239, 0.42);
+    display: flex;
+    margin-top: 1.45rem;
+    min-height: 50px;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__newsletter-form input {
+    background: transparent;
+    border: 0;
+    color: var(--wb-text);
+    flex: 1;
+    font: inherit;
+    font-size: 0.86rem;
+    min-width: 0;
+    padding: 0 1rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__newsletter-form button {
+    align-self: stretch;
+    background: transparent;
+    border: 0;
+    color: var(--wb-text);
+    cursor: pointer;
+    font-size: 1.35rem;
+    padding: 0 1rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__legal {
+    border-top: 1px solid var(--wb-line-light);
+    color: rgba(247, 245, 239, 0.48);
+    display: flex;
+    font-size: 0.76rem;
+    gap: 1rem;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    padding-top: 1.4rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__legal p {
+    margin: 0;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__legal div {
+    display: flex;
+    gap: 2rem;
+  }
+
+  #WatchBayHomepage-{{ section.id }} .watchbay-homepage__legal a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #WatchBayHomepage-{{ section.id }} a:focus-visible,
+  #WatchBayHomepage-{{ section.id }} button:focus-visible,
+  #WatchBayHomepage-{{ section.id }} input:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 0.3rem;
+  }
+
+  @media screen and (max-width: 989px) {
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__nav {
+      grid-template-columns: 1fr auto;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__links {
+      display: none;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-grid,
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy,
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__curated,
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer {
+      grid-template-columns: 1fr;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-grid {
+      align-items: end;
+      min-height: 720px;
+      padding-top: 8rem;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-media {
+      inset: 0;
+      opacity: 0.74;
+      top: 0;
+      width: 100%;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-media::before {
+      background: linear-gradient(90deg, #020202 0%, rgba(2, 2, 2, 0.82) 44%, rgba(2, 2, 2, 0.3) 100%);
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero h1 {
+      font-size: clamp(4rem, 17vw, 6.8rem);
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust-item {
+      border-left: 0 !important;
+      border-top: 1px solid var(--wb-line-dark);
+      padding: 1.2rem 0;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-nav {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__announcement {
+      letter-spacing: 0.16em;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__nav {
+      min-height: 76px;
+      padding: 1rem 1.1rem;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__brand {
+      font-size: 1rem;
+      letter-spacing: 0.26em;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__actions {
+      gap: 0.85rem;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__actions svg {
+      height: 21px;
+      width: 21px;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-grid {
+      min-height: 650px;
+      padding: 5rem 1.1rem 3rem;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__hero-copy > p:not(.watchbay-homepage__eyebrow) {
+      max-width: 20rem;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__philosophy,
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__curated,
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust,
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer {
+      padding-left: 1.1rem;
+      padding-right: 1.1rem;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__products,
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__trust,
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__footer-nav {
+      grid-template-columns: 1fr;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__legal {
+      display: grid;
+    }
+
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__legal div {
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #WatchBayHomepage-{{ section.id }} .watchbay-homepage__text-link {
+      transition: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Watch Bay homepage",
+  "tag": "section",
+  "class": "section-wrapper",
+  "settings": [
+    {
+      "type": "text",
+      "id": "announcement",
+      "label": "Announcement",
+      "default": "Complimentary worldwide shipping on all orders"
+    },
+    {
+      "type": "url",
+      "id": "collection_link",
+      "label": "Collection link"
+    },
+    {
+      "type": "url",
+      "id": "about_link",
+      "label": "About link"
+    },
+    {
+      "type": "url",
+      "id": "journal_link",
+      "label": "Journal link"
+    },
+    {
+      "type": "url",
+      "id": "contact_link",
+      "label": "Contact link"
+    },
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow",
+      "default": "Precision. Heritage. Timeless Design."
+    },
+    {
+      "type": "textarea",
+      "id": "hero_heading",
+      "label": "Heading",
+      "default": "Time,\nPerfected."
+    },
+    {
+      "type": "textarea",
+      "id": "hero_text",
+      "label": "Text",
+      "default": "Discover exceptional timepieces crafted for those who value precision over trends."
+    },
+    {
+      "type": "text",
+      "id": "hero_cta_label",
+      "label": "CTA label",
+      "default": "Explore Collection"
+    },
+    {
+      "type": "url",
+      "id": "hero_cta_link",
+      "label": "CTA link"
+    },
+    {
+      "type": "header",
+      "content": "Philosophy"
+    },
+    {
+      "type": "image_picker",
+      "id": "philosophy_image",
+      "label": "Philosophy image"
+    },
+    {
+      "type": "text",
+      "id": "philosophy_eyebrow",
+      "label": "Eyebrow",
+      "default": "Our Philosophy"
+    },
+    {
+      "type": "textarea",
+      "id": "philosophy_heading",
+      "label": "Heading",
+      "default": "Beyond Time.\nBeyond Ordinary."
+    },
+    {
+      "type": "textarea",
+      "id": "philosophy_text",
+      "label": "Text",
+      "default": "We believe a watch is more than a way to tell time.\nIt is a legacy on your wrist - a reflection of precision, purpose, and personal story."
+    },
+    {
+      "type": "text",
+      "id": "philosophy_cta_label",
+      "label": "CTA label",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "philosophy_link",
+      "label": "CTA link"
+    },
+    {
+      "type": "header",
+      "content": "Curated selection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Product collection"
+    },
+    {
+      "type": "text",
+      "id": "curated_eyebrow",
+      "label": "Eyebrow",
+      "default": "Curated Selection"
+    },
+    {
+      "type": "textarea",
+      "id": "curated_heading",
+      "label": "Heading",
+      "default": "Timeless Pieces\nfor Every Moment."
+    },
+    {
+      "type": "text",
+      "id": "curated_cta_label",
+      "label": "CTA label",
+      "default": "View Collection"
+    },
+    {
+      "type": "header",
+      "content": "Trust strip"
+    },
+    {
+      "type": "text",
+      "id": "trust_1_title",
+      "label": "Trust 1 title",
+      "default": "Complimentary Shipping"
+    },
+    {
+      "type": "text",
+      "id": "trust_1_text",
+      "label": "Trust 1 text",
+      "default": "Worldwide on all orders"
+    },
+    {
+      "type": "text",
+      "id": "trust_2_title",
+      "label": "Trust 2 title",
+      "default": "International Warranty"
+    },
+    {
+      "type": "text",
+      "id": "trust_2_text",
+      "label": "Trust 2 text",
+      "default": "5-year warranty on every watch"
+    },
+    {
+      "type": "text",
+      "id": "trust_3_title",
+      "label": "Trust 3 title",
+      "default": "Easy Returns"
+    },
+    {
+      "type": "text",
+      "id": "trust_3_text",
+      "label": "Trust 3 text",
+      "default": "30-day returns, hassle-free"
+    },
+    {
+      "type": "text",
+      "id": "trust_4_title",
+      "label": "Trust 4 title",
+      "default": "Secure Payments"
+    },
+    {
+      "type": "text",
+      "id": "trust_4_text",
+      "label": "Trust 4 text",
+      "default": "Encrypted & trusted checkout"
+    },
+    {
+      "type": "header",
+      "content": "Social links"
+    },
+    {
+      "type": "url",
+      "id": "instagram_link",
+      "label": "Instagram link"
+    },
+    {
+      "type": "url",
+      "id": "facebook_link",
+      "label": "Facebook link"
+    },
+    {
+      "type": "url",
+      "id": "pinterest_link",
+      "label": "Pinterest link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Watch Bay homepage",
+      "category": "Banners"
+    }
+  ]
+}
+{% endschema %}
